@@ -2,10 +2,13 @@
 --------------------------------------------------------------------------------------------------------
 
 # Cloud Name = 'Cloud Admin'
+-1 means an issue retreiving the data
+
+
 --------------------------------------------------------------------------------------------------------
 
- Cloud Manager Details (-1 means an issue retreiving the data)
- 
+ Cloud Manager Details
+
 |      NUMBER OF ORGS       | 17 |
 |---------------------------|----|
 | Number of Members         |  2 |
