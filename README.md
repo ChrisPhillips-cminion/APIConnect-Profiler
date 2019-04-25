@@ -4,16 +4,15 @@
 # Cloud Name = 'Cloud Admin'
 --------------------------------------------------------------------------------------------------------
 
- Cloud Manager Details (-1 means an issue retreiving the data or 0 found.)
- Number of Orgs                            -  17 
- 
- Number of Members                         -  2 
- 
- Number of Member Invites                  -  0 
- 
- Number of Oauth Providers                 -  0 
- Number of User Registries                 -  3 
- Number of Mail Servers                    -  1 
+ Cloud Manager Details (-1 means an issue retreiving the data)
+|      NUMBER OF ORGS       | 17 |
+|---------------------------|----|
+| Number of Members         |  2 |
+| Number of Member Invites  |  0 |
+| Number of Oauth Providers |  0 |
+| Number of User Registries |  3 |
+| Number of Mail Servers    |  1 |
+
 --------------------------------------------------------------------------------------------------------
 
  ## Number of Availability Zones 2
