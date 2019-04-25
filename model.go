@@ -44,26 +44,40 @@ type catalog struct {
 	noProduct       int
 	avgAPISize      int
 	maxAPISize      int
-	noSpace         int //*[]space
-	noConsumerOrg   int //*[]consumerOrg
+	noSpace         int
+	noConsumerOrg   int
 	portal          bool
 	noTLSProfile    int
 	noOAuthProvider int
 	userRegistries  int
 	applications    int
+	subscriptions   int
+	webhooks        *[]webhook
+	tasks           *[]task
 }
 
-type space struct {
-	name       string
-	noMember   int
-	noAPI      int
-	noProduct  int
-	avgAPISize int
-	maxAPISize int
+type webhook struct {
+	webhookId        string
+	organizationName string
+	catalogName      string
+	organization     string
+	catalog          string
+	state            string
+	created_at       string
+	updated_at       string
+	level            string
+	title            string
 }
-
-type consumerOrg struct {
-	name           string
-	noMember       int
-	noApplications int
+type task struct {
+	taskId           string
+	organizationName string
+	catalogName      string
+	organization     string
+	catalog          string
+	state            string
+	created_at       string
+	updated_at       string
+	name             string
+	title            string
+	content          map[string]interface{}
 }

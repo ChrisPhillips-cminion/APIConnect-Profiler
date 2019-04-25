@@ -66,9 +66,15 @@ func GetTopLevel() topLevel {
 		access_token = login(PromptCredentials("All"))
 	}
 	org := make([]organization, len(orgsToInvestigate.POrg))
+	chanList := make(map[string]chan bool, len(orgsToInvestigate.POrg))
 	for i, v := range orgsToInvestigate.POrg {
-		Log("Investigating Organization " + v)
-		org[i] = GetPOrg(orgMap[v], access_token)
+		chanList[v] = make(chan bool)
+		go asyncGetPorg(i, v, org, access_token, chanList, orgMap)
+	}
+	for _, v := range orgsToInvestigate.POrg {
+		Log(v + " waiting.... ")
+		<-chanList[v]
+		Log(v + " complete.... ")
 	}
 	Trace(org)
 	data := topLevel{
@@ -232,4 +238,11 @@ func loginCM(UC userCreds) string {
 	toReturn := login(UC)
 	TraceExit("loginCM")
 	return toReturn
+}
+
+func asyncGetPorg(i int, localV string, org []organization, access_token string, chanList map[string]chan bool, orgMap map[string]orgNameId) {
+	Log("Investigating Organization " + localV)
+	org[i] = GetPOrg(orgMap[localV], access_token)
+	Log("DONE " + localV)
+	chanList[localV] <- true
 }

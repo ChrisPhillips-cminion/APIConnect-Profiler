@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -49,7 +50,7 @@ func PromptCredentials(porg string) userCreds {
 	return userDetails
 }
 func Log(s interface{}) {
-	log.Printf("\t %v\n", s)
+	fmt.Printf("\t %v\n", s)
 }
 func Trace(s interface{}) {
 	if debug {
@@ -92,6 +93,7 @@ func (gz gzreadCloser) Close() error {
 }
 
 func APICRequest(path string) map[string]interface{} {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	TraceEnter("APICRequest")
 	Trace("path " + "https://" + server + "/api/" + path)
 	req, err := http.NewRequest("GET", "https://"+server+"/api/"+path, nil)
@@ -108,9 +110,9 @@ func APICRequest(path string) map[string]interface{} {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		Trace(err.Error())
+		Log(err.Error())
+		TraceExit("APICRequest")
 		return nil
-
 	}
 	if resp.Status != "200 OK" {
 		log.Printf("HTTP Status '%v'", resp.Status)
@@ -122,12 +124,14 @@ func APICRequest(path string) map[string]interface{} {
 	bodyBytes, err2 := ioutil.ReadAll(resp.Body)
 
 	if err2 != nil {
-		Trace(err2.Error())
+		Log(err2.Error())
+		TraceExit("APICRequest")
 		return nil
 	}
 	err = json.Unmarshal(bodyBytes, &jsonObj)
 	if err != nil {
-		Trace(err.Error())
+		Log(err.Error())
+		TraceExit("APICRequest")
 		return nil
 	}
 	TraceExit("APICRequest")
@@ -137,6 +141,7 @@ func APICRequest(path string) map[string]interface{} {
 func APICRequestSize(url string) int {
 	TraceEnter("APICRequest")
 	Trace("path " + url)
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		Trace(err.Error())
@@ -161,8 +166,6 @@ func APICRequestSize(url string) int {
 	}
 	defer resp.Body.Close()
 	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-
-	Trace(len(bodyBytes))
 
 	return len(bodyBytes)
 }
@@ -192,7 +195,7 @@ func login(UC userCreds) string {
 		// handle err
 	}
 	body := bytes.NewReader(payloadBytes)
-
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	req, err := http.NewRequest("POST", "https://"+server+"/api/token", body)
 	if err != nil {
 		// handle err
@@ -212,7 +215,6 @@ func login(UC userCreds) string {
 	}
 	if resp.Status != "200 OK" {
 		log.Printf("HTTP Status %v", resp.Status)
-		Trace(string(payloadBytes))
 		os.Exit(2)
 		return "error 2"
 	}
@@ -253,6 +255,17 @@ func getData(type1 string, orgId string, keyword string) int {
 		return -1
 	}
 	toReturn := int(jsonObj["total_results"].(float64))
-	TraceExitReturn("getData", fmt.Sprintf("keyword %v", toReturn))
+	TraceExitReturn("getData", fmt.Sprintf("%v %v", keyword, toReturn))
 	return toReturn
+}
+
+//https://apim.lts.apicww.cloud/api/spaces/8643dbab-b431-4602-a083-8d8fa29d2f6e/42298b69-0edf-4cc3-83b4-232786976bbe/ae90bbac-9cc5-4b9e-9197-215efdacd3f8/configured-tls-client-profiles
+func getDataSpaces(type1 string, orgId string, keyword string, spaces *[]string) int {
+	TraceEnter("getDataSpaces")
+	count := 0
+	for _, v := range *spaces {
+		count = count + getData("spaces", orgId+"/"+v, keyword)
+	}
+	TraceExitReturn("getDataSpaces", fmt.Sprintf("%v %v", keyword, count))
+	return count
 }
