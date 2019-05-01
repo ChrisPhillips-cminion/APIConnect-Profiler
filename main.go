@@ -21,9 +21,9 @@ var debug = false
 func main() {
 	TraceEnter("main")
 	// output := "unset"
-	outputTypePtr := flag.String("output", "json", "Dictates the output type for the script. Value must be one of [ table | json | yaml | verbose ] ")
+	outputTypePtr := flag.String("output", "table", "Dictates the output type for the script. Value must be one of [ table | json | yaml | verbose ] ")
 	debugPtr := flag.Bool("debug", false, "Enable trace for this appication")
-	serverPtr := flag.String("server", "", "APIConnect Cloud endpoint, if this is not set it is prompted")
+	serverPtr := flag.String("server", "unset", "APIConnect Cloud endpoint, if this is not set it is prompted")
 	realmPtr := flag.String("CMrealm", "", "Realm for logging into the Cloud Manager Endpoint, if this is not set it is prompted")
 	userPtr := flag.String("CMuser", "", "APIConnect User for logging into the Cloud Manager Endpoint, if this is not set it is prompted")
 	passwordPtr := flag.String("CMpassword", "", "APIConnect Password for logging into the Cloud Manager Endpoint, if this is not set it is prompted")
