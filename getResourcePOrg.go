@@ -1,56 +1,84 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
 
-func GetPOrg(orgDetails orgNameId, access_token string) organization {
+func GetPOrg(orgDetails orgNameId, access_token string) (organization, error) {
 	TraceEnter("Get Org")
 	if access_token == "unset" {
 		userDetails = userCreds{}
-		token = login(PromptCredentials(orgDetails.name))
+		err := errors.New("Not an error")
+		token, err = login(PromptCredentials(orgDetails.Name))
+
+		if err != nil {
+			TraceExit("GetPOrg ERROR")
+			return organization{}, err
+		}
 	} else {
 		token = access_token
 	}
 	// promptToAnalyse()
 	orgId := orgDetails.id
-	no, max, avg := ProcessAPI("orgs/"+orgId+"/drafts/draft-apis", "draft_api")
+	no, max, avg, _ := ProcessAPI("orgs/"+orgId+"/drafts/draft-apis", "draft_api")
+	cat, err := GetCatalogs(orgDetails.Name, orgId)
+	member, err := getData("orgs", orgId, "members")
+	mi, err := getData("orgs", orgId, "member-invitations")
+	dp, err := getData("orgs", orgId+"/drafts", "draft-products")
+	NoTLSProfile, err := getData("orgs", orgId, "tls-client-profiles")
+	NoKeyStore, err := getData("orgs", orgId, "keystores")
+	NoTrustStore, err := getData("orgs", orgId, "truststores")
+	UserRegistries, err := getData("orgs", orgId, "user-registries")
+	NoOAuthProvider, err := getData("orgs", orgId, "oauth-providers")
+	if err != nil {
+		TraceExit("GetPOrg ERROR")
+		return organization{}, err
+	}
 	toReturn := organization{
-		name:            orgDetails.name,
-		catalog:         GetCatalogs(orgDetails.name, orgId),
-		noMembers:       getData("orgs", orgId, "members"),
-		noMemberInvites: getData("orgs", orgId, "member-invitations"),
-		noDraftAPI:      no,
-		avgAPISize:      avg,
-		maxAPISize:      max,
-		noDraftProduct:  getData("orgs", orgId+"/drafts", "draft-products"),
-		noTLSProfile:    getData("orgs", orgId, "tls-client-profiles"),
-		noKeyStore:      getData("orgs", orgId, "keystores"),
-		noTrustStore:    getData("orgs", orgId, "truststores"),
-		userRegistries:  getData("orgs", orgId, "user-registries"),
-		noOAuthProvider: getData("orgs", orgId, "oauth-providers")}
+		Name:            orgDetails.Name,
+		Catalog:         cat,
+		NoMembers:       member,
+		NoMemberInvites: mi,
+		NoDraftAPI:      no,
+		AvgAPISize:      avg,
+		MaxAPISize:      max,
+		NoDraftProduct:  dp,
+		NoTLSProfile:    NoTLSProfile,
+		NoKeyStore:      NoKeyStore,
+		NoTrustStore:    NoTrustStore,
+		UserRegistries:  UserRegistries,
+		NoOAuthProvider: NoOAuthProvider}
 	TraceExitReturn("Get Org", toReturn)
-	return toReturn
+	return toReturn, nil
 
 }
-func GetSpaceIDs(orgId string) *[]string {
+func GetSpaceIDs(orgId string) (*[]string, error) {
 	TraceEnter("GetSpaceIDs")
 	path := "catalogs/" + orgId + "/spaces"
-	jsonObj := APICRequest(path)
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		TraceExit("GetSpaceIDs ERROR")
+		return nil, err
+	}
 	len := int(jsonObj["total_results"].(float64))
 	toReturn := make([]string, len)
 	for i, v := range jsonObj["results"].([]interface{}) {
 		toReturn[i] = v.(map[string]interface{})["id"].(string)
 	}
 	TraceExitReturn("GetSpaceIDs", toReturn)
-	return &toReturn
+	return &toReturn, nil
 }
 
-func GetCatalogs(orgName string, orgId string) *[]catalog {
+func GetCatalogs(orgName string, orgId string) (*[]catalog, error) {
 	TraceEnter("GetCatalogs")
 	path := "orgs/" + orgId + "/catalogs"
-	jsonObj := APICRequest(path)
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		TraceExit("GetCatalogs ERROR")
+		return nil, err
+	}
 	len := int(jsonObj["total_results"].(float64))
 	toReturn := make([]catalog, len)
 
@@ -66,15 +94,17 @@ func GetCatalogs(orgName string, orgId string) *[]catalog {
 		<-chanList[name]
 	}
 	TraceExitReturn("GetCatalogs", toReturn)
-	return &toReturn
+	return &toReturn, nil
 }
 
-func ProcessAPI(path string, apiType string) (int, int, int) {
+func ProcessAPI(path string, apiType string) (int, int, int, error) {
 	TraceEnter("ProcessAPI")
-	jsonObj := APICRequest(path)
-	if jsonObj == nil {
-		return -1, -1, -1
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		TraceExit("GetCatalogs ERROR")
+		return -1, -1, -1, err
 	}
+
 	no := int(jsonObj["total_results"].(float64))
 	max := 0
 	total := 0
@@ -91,50 +121,58 @@ func ProcessAPI(path string, apiType string) (int, int, int) {
 	}
 
 	TraceExitReturn("ProcessAPI", fmt.Sprintf("API Nos %v\t Max Size %v\t Avg Size %v", no, max, avg))
-	return no, max, avg
+	return no, max, avg, nil
 }
 
-func GetCOrgs(orgId string) (int, int, int) {
+func GetCOrgs(orgId string) (int, int, int, error) {
 	TraceEnter("GetCOrgs")
 	path := "catalogs/" + orgId + "/consumer-orgs"
-	jsonObj := APICRequest(path)
-	if jsonObj == nil {
-		TraceExitReturn("GetCOrgs", "ERROR")
-		return -1, -1, -1
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		TraceExit("GetCOrgs ERROR")
+		return -1, -1, -1, err
 	}
+
 	no := int(jsonObj["total_results"].(float64))
 	noa := 0
 	nos := 0
+	errorFlag := false
 	for _, v := range jsonObj["results"].([]interface{}) {
 		url := v.(map[string]interface{})["url"].(string) + "/apps"
 		Trace(url)
 		Trace(strings.Split(url, "/api/")[1])
-		jsonObj = APICRequest(strings.Split(url, "/api/")[1])
-		if jsonObj == nil {
+		jsonObj, err = APICRequest(strings.Split(url, "/api/")[1])
+		if err != nil {
 			noa = -1
 			break
 		} else {
 			noa = noa + int(jsonObj["total_results"].(float64))
 		}
-		for _, av := range jsonObj["results"].([]interface{}) {
 
-			nos = nos + getData("apps", orgId+"/"+v.(map[string]interface{})["id"].(string)+"/"+av.(map[string]interface{})["id"].(string), "subscriptions")
+		for _, av := range jsonObj["results"].([]interface{}) {
+			v, err := getData("apps", orgId+"/"+v.(map[string]interface{})["id"].(string)+"/"+av.(map[string]interface{})["id"].(string), "subscriptions")
+			if err != nil {
+				errorFlag = true
+			}
+			nos = nos + v
 		}
 
 	}
+	if errorFlag {
+		nos = -1
+	}
 
 	TraceExitReturn("GetCOrgs", fmt.Sprintf("ConsumerOrg %v \t Applications %v \t Subscriptions %v", no, noa, nos))
-	return no, noa, nos
+	return no, noa, nos, nil
 }
 
-func GetPortal(orgId string) bool {
+func GetPortal(orgId string) (bool, error) {
 	TraceEnter("GetPortal")
 	path := "catalogs/" + orgId + "/settings"
-	jsonObj := APICRequest(path)
-	if jsonObj == nil {
-		TraceExitReturn("GetCOrgs", "ERROR")
-
-		return false
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		TraceExit("GetPortal ERROR")
+		return false, err
 	}
 	toReturn := false
 	if jsonObj["portal"].(map[string]interface{})["type"].(string) == "none" {
@@ -143,106 +181,125 @@ func GetPortal(orgId string) bool {
 		toReturn = true
 	}
 	TraceExitReturn("GetPortal", toReturn)
-	return toReturn
+	return toReturn, nil
 
 }
-func AsyncGetCat(orgName string, name string, i int, v interface{}, toReturn []catalog, orgId string, chanList map[string]chan bool) {
+func AsyncGetCat(orgName string, name string, i int, v interface{}, toReturn []catalog, orgId string, chanList map[string]chan bool) error {
 	TraceEnter("AsyncGetCat")
 	Log("\tInvestigating Catalog " + name + " in " + orgName)
 	catId := v.(map[string]interface{})["id"].(string)
-	no, max, avg := ProcessAPI("catalogs/"+orgId+"/"+catId+"/apis", "api")
-	noc, noa, nos := GetCOrgs(orgId + "/" + catId)
-	spaceNo := getData("catalogs", orgId+"/"+catId, "spaces")
-	noTLSProfile := -1
+	no, max, avg, _ := ProcessAPI("catalogs/"+orgId+"/"+catId+"/apis", "api")
+	noc, noa, nos, _ := GetCOrgs(orgId + "/" + catId)
+	spaceNo, _ := getData("catalogs", orgId+"/"+catId, "spaces")
+	NoTLSProfile := -1
 	userRegistries := -1
-	noOAuthProvider := -1
+	NoOAuthProvider := -1
 
 	if spaceNo < 1 {
-		noTLSProfile = getData("catalogs", orgId+"/"+catId, "configured-tls-client-profiles")
-		userRegistries = getData("catalogs", orgId+"/"+catId, "configured-api-user-registries")
-		noOAuthProvider = getData("catalogs", orgId+"/"+catId, "configured-oauth-providers")
+		NoTLSProfile, _ = getData("catalogs", orgId+"/"+catId, "configured-tls-client-profiles")
+		userRegistries, _ = getData("catalogs", orgId+"/"+catId, "configured-api-user-registries")
+		NoOAuthProvider, _ = getData("catalogs", orgId+"/"+catId, "configured-oauth-providers")
 	} else {
-		ids := GetSpaceIDs(orgId + "/" + catId)
-		noTLSProfile = getDataSpaces("catalogs", orgId+"/"+catId, "configured-tls-client-profiles", ids)
+		ids, err := GetSpaceIDs(orgId + "/" + catId)
+		if err != nil {
+			chanList[name] <- true
+			TraceExit("AsyncGetCat ERROR")
+			return err
+		}
+		NoTLSProfile = getDataSpaces("catalogs", orgId+"/"+catId, "configured-tls-client-profiles", ids)
 		userRegistries = getDataSpaces("catalogs", orgId+"/"+catId, "configured-api-user-registries", ids)
-		noOAuthProvider = getDataSpaces("catalogs", orgId+"/"+catId, "configured-oauth-providers", ids)
+		NoOAuthProvider = getDataSpaces("catalogs", orgId+"/"+catId, "configured-oauth-providers", ids)
 	}
+	mem, _ := getData("catalogs", orgId+"/"+catId, "members")
+	mi, _ := getData("catalogs", orgId+"/"+catId, "member-invitations")
+	prod, _ := getData("catalogs", orgId+"/"+catId, "products")
+	portal, err := GetPortal(orgId + "/" + catId)
+	if err != nil {
+		Log(fmt.Sprintf("Unable to get portal state for %v", name))
+	}
+	wh, _ := GetWebhooks(orgName, orgId, name, catId)
+	t, _ := GetTasks(orgName, orgId, name, catId)
 	toReturn[i] = catalog{
-		name:            name,
-		noMember:        getData("catalogs", orgId+"/"+catId, "members"),
-		noMemberInvites: getData("catalogs", orgId+"/"+catId, "member-invitations"),
-		noAPI:           no,
-		noProduct:       getData("catalogs", orgId+"/"+catId, "products"),
-		avgAPISize:      avg,
-		maxAPISize:      max,
-		noSpace:         spaceNo,
-		noConsumerOrg:   noc,
-		portal:          GetPortal(orgId + "/" + catId),
-		noTLSProfile:    noTLSProfile,
-		userRegistries:  userRegistries,
-		noOAuthProvider: noOAuthProvider,
-		applications:    noa,
-		subscriptions:   nos,
-		webhooks:        GetWebhooks(orgName, orgId, name, catId),
-		tasks:           GetTasks(orgName, orgId, name, catId),
+		Name:            name,
+		NoMember:        mem,
+		NoMemberInvites: mi,
+		NoAPI:           no,
+		NoProduct:       prod,
+		AvgAPISize:      avg,
+		MaxAPISize:      max,
+		NoSpace:         spaceNo,
+		NoConsumerOrg:   noc,
+		Portal:          portal,
+		NoTLSProfile:    NoTLSProfile,
+		UserRegistries:  userRegistries,
+		NoOAuthProvider: NoOAuthProvider,
+		Applications:    noa,
+		Subscriptions:   nos,
+		Webhooks:        wh,
+		Tasks:           t,
 	}
 
 	chanList[name] <- true
 	TraceExit("AsyncGetCat")
+	return nil
 }
 
-func GetWebhooks(orgName string, orgId string, catName string, catId string) *[]webhook {
+func GetWebhooks(orgName string, orgId string, catName string, catId string) (*[]webhook, error) {
 	TraceEnter("GetWebhooks")
 	path := "catalogs/" + orgId + "/" + catId + "/webhooks"
-	jsonObj := APICRequest(path)
-	if jsonObj == nil {
-		return nil
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		Trace(err.Error())
+		TraceExit("GetWebhooks")
+		return nil, err
 	}
 	toReturn := make([]webhook, int(jsonObj["total_results"].(float64)))
 
 	for i, v := range jsonObj["results"].([]interface{}) {
 		vMap := v.(map[string]interface{})
 		toReturn[i] = webhook{
-			webhookId:        vMap["id"].(string),
-			catalogName:      catName,
-			organization:     orgId,
-			organizationName: orgName,
-			catalog:          catId,
-			state:            vMap["state"].(string),
-			created_at:       vMap["created_at"].(string),
-			updated_at:       vMap["updated_at"].(string),
-			level:            vMap["level"].(string),
-			title:            vMap["title"].(string),
+			WebhookId:        vMap["id"].(string),
+			CatalogName:      catName,
+			Organization:     orgId,
+			OrganizationName: orgName,
+			Catalog:          catId,
+			State:            vMap["state"].(string),
+			Created_at:       vMap["created_at"].(string),
+			Updated_at:       vMap["updated_at"].(string),
+			Level:            vMap["level"].(string),
+			Title:            vMap["title"].(string),
 		}
 	}
 	TraceExitReturn("GetWebhooks", fmt.Sprintf("webhooks %v", toReturn))
-	return &toReturn
+	return &toReturn, nil
 }
 
-func GetTasks(orgName string, orgId string, catName string, catId string) *[]task {
+func GetTasks(orgName string, orgId string, catName string, catId string) (*[]task, error) {
 	TraceEnter("GetTasks")
 	path := "catalogs/" + orgId + "/" + catId + "/tasks"
-	jsonObj := APICRequest(path)
-	if jsonObj == nil {
-		return nil
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		Trace(err.Error())
+		TraceExit("GetTasks")
+		return nil, err
 	}
 	toReturn := make([]task, int(jsonObj["total_results"].(float64)))
 	for i, v := range jsonObj["results"].([]interface{}) {
 		vMap := v.(map[string]interface{})
 		toReturn[i] = task{
-			taskId:       vMap["id"].(string),
-			catalogName:  catName,
-			organization: orgId,
-			name:         vMap["name"].(string),
-			state:        vMap["state"].(string),
-			created_at:   vMap["created_at"].(string),
-			updated_at:   vMap["updated_at"].(string),
-			content:      v.(map[string]interface{}),
+			TaskId:       vMap["id"].(string),
+			CatalogName:  catName,
+			Organization: orgId,
+			Name:         vMap["name"].(string),
+			State:        vMap["state"].(string),
+			Created_at:   vMap["created_at"].(string),
+			Updated_at:   vMap["updated_at"].(string),
+			Content:      v.(map[string]interface{}),
 		}
 
 		Log(v.(map[string]interface{}))
 	}
 
 	TraceExitReturn("GetTasks", fmt.Sprintf("webhooks %v", toReturn))
-	return &toReturn
+	return &toReturn, nil
 }

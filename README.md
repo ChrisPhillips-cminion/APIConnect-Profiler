@@ -1,3 +1,13 @@
+# API Profiler
+
+
+This tool was created to extract non runtime statistics from an API Connect 2018 system.
+
+To run the tool please download the latest release and run with the following options.
+
+The default output is table, which produced a markdown table similar to below.
+
+
 
 --------------------------------------------------------------------------------------------------------
 
@@ -86,4 +96,3 @@
 | Title        | IBM Developer Portal                 | idg77v                               | idg77v-v5c                           | idg77v                               | idg77v-v5c                           | idg77v                               | idg77v-v5c                           |
 | Created At   | 2019-04-24T11:12:10.119Z             | 2019-03-04T14:19:05.289Z             | 2019-03-08T17:38:45.159Z             | 2019-04-24T11:55:42.163Z             | 2019-04-24T11:55:47.721Z             | 2019-03-25T08:59:18.597Z             | 2019-03-25T08:59:25.592Z             |
 | Updated At   | 2019-04-25T10:20:16.545Z             | 2019-03-21T16:33:06.720Z             | 2019-03-21T18:09:43.892Z             | 2019-04-24T11:56:00.152Z             | 2019-04-24T11:56:00.247Z             | 2019-03-25T08:59:23.015Z             | 2019-03-25T08:59:45.223Z             |
-

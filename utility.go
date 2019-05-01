@@ -5,16 +5,15 @@ import (
 	"compress/gzip"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
+	// "os"
 )
-
-var debug = false
 
 type userCreds struct {
 	username string
@@ -83,6 +82,7 @@ func TraceEnter(s string) {
 	}
 }
 
+//
 type gzreadCloser struct {
 	*gzip.Reader
 	io.Closer
@@ -92,14 +92,15 @@ func (gz gzreadCloser) Close() error {
 	return gz.Closer.Close()
 }
 
-func APICRequest(path string) map[string]interface{} {
+func APICRequest(path string) (map[string]interface{}, error) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	TraceEnter("APICRequest")
 	Trace("path " + "https://" + server + "/api/" + path)
 	req, err := http.NewRequest("GET", "https://"+server+"/api/"+path, nil)
 	if err != nil {
 		Trace(err.Error())
-		return nil
+		TraceExit("APICRequest Error")
+		return nil, err
 	}
 	// Trace(token)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -110,13 +111,16 @@ func APICRequest(path string) map[string]interface{} {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		Log(err.Error())
-		TraceExit("APICRequest")
-		return nil
+		// Log(err.Error())
+
+		Trace(err.Error())
+		TraceExit("APICRequest Error")
+		return nil, err
 	}
 	if resp.Status != "200 OK" {
-		log.Printf("HTTP Status '%v'", resp.Status)
-		return nil
+		Trace(fmt.Sprintf("HTTP Status '%v'", resp.Status))
+		TraceExit("APICRequest ERROR")
+		return nil, errors.New(fmt.Sprintf("HTTP Status '%v'", resp.Status))
 	}
 	defer resp.Body.Close()
 
@@ -125,17 +129,17 @@ func APICRequest(path string) map[string]interface{} {
 
 	if err2 != nil {
 		Log(err2.Error())
-		TraceExit("APICRequest")
-		return nil
+		TraceExit("APICRequest Error")
+		return nil, err
 	}
 	err = json.Unmarshal(bodyBytes, &jsonObj)
 	if err != nil {
 		Log(err.Error())
-		TraceExit("APICRequest")
-		return nil
+		TraceExit("APICRequest Error")
+		return nil, err
 	}
 	TraceExit("APICRequest")
-	return jsonObj
+	return jsonObj, nil
 }
 
 func APICRequestSize(url string) int {
@@ -170,7 +174,7 @@ func APICRequestSize(url string) int {
 	return len(bodyBytes)
 }
 
-func login(UC userCreds) string {
+func login(UC userCreds) (string, error) {
 	TraceEnter("login")
 	type Payload struct {
 		Username     string `json:"username"`
@@ -192,13 +196,19 @@ func login(UC userCreds) string {
 
 	payloadBytes, err := json.Marshal(data)
 	if err != nil {
-		// handle err
+
+		Trace(err.Error())
+		return "error", err
+
 	}
 	body := bytes.NewReader(payloadBytes)
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	req, err := http.NewRequest("POST", "https://"+server+"/api/token", body)
+
 	if err != nil {
-		// handle err
+		Trace(err.Error())
+		return "error", err
+
 	}
 	req.Header.Set("Origin", "https://apim.lts.apicww.cloud")
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
@@ -211,15 +221,15 @@ func login(UC userCreds) string {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		Trace(err.Error())
-		return "error 1"
+		return "error", err
 	}
+	defer resp.Body.Close()
 	if resp.Status != "200 OK" {
 		log.Printf("HTTP Status %v", resp.Status)
-		os.Exit(2)
-		return "error 2"
+		// os.Exit(2)
+		return "error", err
 	}
 
-	defer resp.Body.Close()
 	jsonObj := make(map[string]interface{})
 
 	zr, err := gzip.NewReader(resp.Body)
@@ -228,44 +238,62 @@ func login(UC userCreds) string {
 		Trace(bodyBytes)
 		Trace(err.Error())
 	} else {
-		resp.Body = gzreadCloser{zr, resp.Body}
+		gzr := gzreadCloser{zr, resp.Body}
+		resp.Body = gzr
+		defer gzr.Close()
 	}
 
 	bodyBytes, err2 := ioutil.ReadAll(resp.Body)
 	// Trace(string(bodyBytes))
 	if err2 != nil {
 		Trace(err2.Error())
-		return "error 3"
+		TraceExit("login ERROR")
+		return "error", err
 	}
 	err = json.Unmarshal(bodyBytes, &jsonObj)
 
 	if err != nil {
 		Trace(err.Error())
-		return "error 4"
+		TraceExit("login ERROR")
+		return "error", err
 	}
 	TraceExit("login")
-	return jsonObj["access_token"].(string)
+	return jsonObj["access_token"].(string), nil
 }
 
-func getData(type1 string, orgId string, keyword string) int {
+func getData(type1 string, orgId string, keyword string) (int, error) {
 	TraceEnter("getData")
 	path := type1 + "/" + orgId + "/" + keyword
-	jsonObj := APICRequest(path)
-	if jsonObj == nil {
-		return -1
+	jsonObj, err := APICRequest(path)
+	if err != nil {
+		TraceExit("getData ERROR")
+		return -1, err
 	}
 	toReturn := int(jsonObj["total_results"].(float64))
 	TraceExitReturn("getData", fmt.Sprintf("%v %v", keyword, toReturn))
-	return toReturn
+	return toReturn, nil
 }
 
 //https://apim.lts.apicww.cloud/api/spaces/8643dbab-b431-4602-a083-8d8fa29d2f6e/42298b69-0edf-4cc3-83b4-232786976bbe/ae90bbac-9cc5-4b9e-9197-215efdacd3f8/configured-tls-client-profiles
 func getDataSpaces(type1 string, orgId string, keyword string, spaces *[]string) int {
 	TraceEnter("getDataSpaces")
 	count := 0
+	errorFlag := false
 	for _, v := range *spaces {
-		count = count + getData("spaces", orgId+"/"+v, keyword)
+		no, err := getData("spaces", orgId+"/"+v, keyword)
+		if err != nil {
+			errorFlag = true
+			Trace("Error getting a Spaces Details")
+			Trace(err.Error())
+		}
+		count = count + no
+	}
+	if errorFlag {
+		count = -1
 	}
 	TraceExitReturn("getDataSpaces", fmt.Sprintf("%v %v", keyword, count))
 	return count
+}
+func br() {
+	fmt.Printf("\n--------------------------------------------------------------------------------------------------------\n")
 }

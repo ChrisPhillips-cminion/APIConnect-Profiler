@@ -1,0 +1,15 @@
+{
+  "userDetails": {
+    "username": "admin",
+    "password": "",
+    "realm": "admin/default-idp-1"
+  },
+  "userDetailsOrg": {
+    "username": "",
+    "password": "",
+    "realm": "provider/ldap-local"
+  },
+  "server" : "",
+  "orgs": ["dev", "uat"],
+  "output": "json"
+}

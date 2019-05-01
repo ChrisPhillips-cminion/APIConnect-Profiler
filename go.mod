@@ -7,4 +7,5 @@ require (
 	github.com/olekukonko/tablewriter v0.0.1
 	golang.org/x/tools v0.0.0-20190424031103-cb2dda6eabdf // indirect
 	gopkg.in/AlecAivazis/survey.v1 v1.8.3
+	gopkg.in/yaml.v2 v2.2.2
 )
