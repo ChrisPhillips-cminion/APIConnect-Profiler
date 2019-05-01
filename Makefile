@@ -1,5 +1,5 @@
 TIMESTAMP := $(shell date +%s)
-VERSION := v0.01-$(TIMESTAMP)
+VERSION := v1.00-$(TIMESTAMP)
 
 format:
 	go fmt
