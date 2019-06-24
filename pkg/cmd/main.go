@@ -1,5 +1,8 @@
 package main
-
+/*
+      Licensed Materials - Property of IBM
+      © IBM Corp. 2019
+*/
 import (
 	"errors"
 	"flag"
@@ -9,17 +12,6 @@ import (
 	"strings"
 )
 
-//
-// var server = "unset"
-//
-// var token = "unset"
-// var userDetails = utils.UserCreds{}
-//
-// //This is here to supprt the test
-// var userDetailsOrg = utils.UserCreds{}
-// var orgs = make([]string, 3)
-// var output = "unset"
-// var debug = false
 
 func main() {
 	utils.TraceEnter("main")
@@ -75,9 +67,8 @@ func main() {
 	mainRunner()
 }
 
-//This is split out because the test tool can not cope with the flags being set multiple times
+
 func mainRunner() {
-	utils.Log(utils.Vars)
 	utils.Vars.Server = utils.PromptServer()
 	creds := utils.PromptCredentials("Admin", "admin")
 	utils.Log("utils.Logging in")

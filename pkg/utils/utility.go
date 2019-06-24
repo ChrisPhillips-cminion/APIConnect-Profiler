@@ -1,4 +1,8 @@
 package utils
+/*
+      Licensed Materials - Property of IBM
+      © IBM Corp. 2019
+*/
 
 import (
 	"bytes"

@@ -1,14 +1,40 @@
-# API Profiler
+# APIC Profiler
+This tool was created to extract non runtime statistics from an API Connect 2018 system and as a sample for how to call API Connects provider APIs.
+
+To run the tool either go to the releases page or to build from source. To build from source clone the repo and run make in the root directory.
+
+A Sample default output is below this information.
+
+## Usage
+Please note if parameters are not set the user is prompted for the required values.
+
+```
+Chriss-MacBook-Pro-2:APIC-Profiler chris$ ./api-profiler-osx-v1.01-1561420129  --help
+Usage of ./out/v1.01-1561420129/api-profiler-osx-v1.01-1561420129:
+  -APIMorg string
+    	Organiztion List to investigate. Please multiple orgs in csv, e.g. dev,test,chrisp,marketting
+  -APIMpassword string
+    	APIConnect Password for utils.Logging into the API Manager Endpoint, if this is not set it is prompted
+  -APIMrealm string
+    	Realm for utils.Logging into the API Manager Endpoint, if this is not set it is prompted
+  -APIMuser string
+    	APIConnect User for utils.Logging into the API Manager Endpoint, if this is not set it is prompted
+  -CMpassword string
+    	APIConnect Password for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted
+  -CMrealm string
+    	Realm for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted
+  -CMuser string
+    	APIConnect User for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted
+  -debug
+    	Enable trace for this appication
+  -output string
+    	Dictates the output type for the script. Value must be one of é table ö json ö yaml ö verbose ê  (default "table")
+  -server string
+    	APIConnect Cloud endpoint, if this is not set it is prompted (default "unset")
+```
 
 
-This tool was created to extract non runtime statistics from an API Connect 2018 system.
-
-To run the tool please download the latest release and run with the following options.
-
-The default output is table, which produced a markdown table similar to below.
-
-
-
+## Sample default Output
 --------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------
 
@@ -53,7 +79,7 @@ The default output is table, which produced a markdown table similar to below.
 
 --------------------------------------------------------------------------------------------------------
 
-## 		 Number of catalogs investigated - 6  
+## 		 Number of catalogs investigated - 6
 --------------------------------------------------------------------------------------------------------
 |     ORG     |             CATALOG NAME             | MEMBERS | MEMBERINVITES | APIS | AVG API SIZE | MAX API SIZE | PRODUCTS | CONSUMERORGS | PORTAL | TLSPROFILES | OAUTHPROS | USERREGS | SPACES | APPS | SUBSCRIPTIONS | WEBHOOKS |
 |-------------|--------------------------------------|---------|---------------|------|--------------|--------------|----------|--------------|--------|-------------|-----------|----------|--------|------|---------------|----------|
@@ -67,7 +93,7 @@ The default output is table, which produced a markdown table similar to below.
 
 --------------------------------------------------------------------------------------------------------
 
-## 		 Number of Webhooks investigated - 14  
+## 		 Number of Webhooks investigated - 14
 --------------------------------------------------------------------------------------------------------
 |              WEBHOOK ID              |              ORGANIZATION              |                CATALOG                 |       STATE       | LEVEL |            TITLE            |        CREATED AT        |        UPDATED AT        |
 |--------------------------------------|----------------------------------------|----------------------------------------|-------------------|-------|-----------------------------|--------------------------|--------------------------|

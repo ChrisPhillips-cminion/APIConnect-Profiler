@@ -1,5 +1,8 @@
 package model
-
+/*
+      Licensed Materials - Property of IBM
+      © IBM Corp. 2019
+*/
 type TopLevel struct {
 	Name            string
 	NoMembers       int
