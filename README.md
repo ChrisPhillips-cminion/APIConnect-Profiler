@@ -1,7 +1,7 @@
 # APIC Profiler
 This tool was created to extract non runtime statistics from an API Connect 2018 system and as a sample for how to call API Connects provider APIs.
 
-To run the tool either go to the releases page or to build from source. To build from source clone the repo and run make in the root directory.
+To run the tool either go to the releases page [here](https://github.com/ChrisPhillips-cminion/APIConnect-Profiler/releases) or to build from source. To build from source clone the repo and run make in the root directory.
 
 A Sample default output is below this information.
 
