@@ -5,6 +5,9 @@ To run the tool either go to the releases page [here](https://github.com/ChrisPh
 
 A Sample default output is below this information.
 
+## Demo
+[![asciicast](https://asciinema.org/a/zSkEqXvfHSN8I6Sb2UgHI0LwW.svg)](https://asciinema.org/a/zSkEqXvfHSN8I6Sb2UgHI0LwW)
+
 ## Usage
 Please note if parameters are not set the user is prompted for the required values.
 
