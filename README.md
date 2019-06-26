@@ -13,27 +13,28 @@ Please note if parameters are not set the user is prompted for the required valu
 
 ```
 Chriss-MacBook-Pro-2:APIC-Profiler chris$ ./api-profiler-osx-v1.01-1561420129  --help
-Usage of ./out/v1.01-1561420129/api-profiler-osx-v1.01-1561420129:
-  -APIMorg string
-    	Organiztion List to investigate. Please multiple orgs in csv, e.g. dev,test,chrisp,marketting
-  -APIMpassword string
-    	APIConnect Password for utils.Logging into the API Manager Endpoint, if this is not set it is prompted
-  -APIMrealm string
-    	Realm for utils.Logging into the API Manager Endpoint, if this is not set it is prompted
-  -APIMuser string
-    	APIConnect User for utils.Logging into the API Manager Endpoint, if this is not set it is prompted
-  -CMpassword string
-    	APIConnect Password for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted
-  -CMrealm string
-    	Realm for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted
-  -CMuser string
-    	APIConnect User for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted
-  -debug
-    	Enable trace for this appication
-  -output string
-    	Dictates the output type for the script. Value must be one of é table ö json ö yaml ö verbose ê  (default "table")
-  -server string
-    	APIConnect Cloud endpoint, if this is not set it is prompted (default "unset")
+Usage of api-profiler-osx-v1.01:
+-APIMorg string
+    Organiztion List to investigate. Please multiple orgs in csv, e.g. dev,test,chrisp,marketting
+-APIMpassword string
+    APIConnect Password for logging into the API Manager Endpoint, if this is not set it is prompted
+-APIMrealm string
+    Realm for logging into the API Manager Endpoint, if this is not set it is prompted
+-APIMuser string
+    APIConnect User for logging into the API Manager Endpoint, if this is not set it is prompted
+-CMpassword string
+    APIConnect Password for logging into the Cloud Manager Endpoint, if this is not set it is prompted
+-CMrealm string
+    Realm for logging into the Cloud Manager Endpoint, if this is not set it is prompted
+-CMuser string
+    APIConnect User for logging into the Cloud Manager Endpoint, if this is not set it is prompted
+-debug
+    Enable trace for this appication
+-output string
+    Dictates the output type for the script. Value must be one of [ table | json | yaml | verbose ]  (default "table")
+-server string
+    APIConnect Cloud endpoint, if this is not set it is prompted (default "unset")
+
 ```
 
 
