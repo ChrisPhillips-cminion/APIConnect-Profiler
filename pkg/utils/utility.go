@@ -52,7 +52,7 @@ func GetRealm(scope string) error {
 		{
 			Name: "idp",
 			Prompt: &survey.Select{
-				Message: "Pleas select your realm or identity provider:",
+				Message: "Please select your realm or identity provider:",
 				Options: idPs,
 			}}}
 	// survey.AskOne(prompt, &, nil)

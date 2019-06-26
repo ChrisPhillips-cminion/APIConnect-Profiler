@@ -50,8 +50,7 @@ Usage of api-profiler-osx-v1.01:
 
  Cloud Manager Details
 
-	 DONE chrisp2
-	 DONE chrisp3
+
 |      NUMBER OF ORGS       | 19 |
 |---------------------------|----|
 | Number of Members         |  2 |

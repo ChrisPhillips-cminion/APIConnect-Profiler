@@ -65,7 +65,7 @@ func Tablify(data model.TopLevel) {
 	fmt.Printf("\n## Number of Provider Organizations to investigate %v", len(*data.Org))
 	br()
 
-	title = []string{"Name", " ", "Members", "MemberInvites", "DraftAPIs", "Avg API Size", "Max API Size", "DraftProducts", "TLS Profiles", "OAuth PROIVDERS", "User Registries", "KeyStores", "TrustStores", "Catalogs"}
+	title = []string{"Name", " ", "Members", "MemberInvites", "DraftAPIs", "Avg API Size", "Max API Size", "DraftProducts", "TLS Profiles", "OAuth PROVIDERS", "User Registries", "KeyStores", "TrustStores", "Catalogs"}
 	content = make([][]string, len(*data.Org)+1)
 	catCount := 0
 
