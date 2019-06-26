@@ -19,13 +19,13 @@ func main() {
 	outputTypePtr := flag.String("output", "table", "Dictates the output type for the script. Value must be one of [ table | json | yaml | verbose ] ")
 	debugPtr := flag.Bool("debug", false, "Enable trace for this appication")
 	serverPtr := flag.String("server", "unset", "APIConnect Cloud endpoint, if this is not set it is prompted")
-	realmPtr := flag.String("CMrealm", "", "Realm for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted")
-	userPtr := flag.String("CMuser", "", "APIConnect User for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted")
-	passwordPtr := flag.String("CMpassword", "", "APIConnect Password for utils.Logging into the Cloud Manager Endpoint, if this is not set it is prompted")
+	realmPtr := flag.String("CMrealm", "", "Realm for logging into the Cloud Manager Endpoint, if this is not set it is prompted")
+	userPtr := flag.String("CMuser", "", "APIConnect User for logging into the Cloud Manager Endpoint, if this is not set it is prompted")
+	passwordPtr := flag.String("CMpassword", "", "APIConnect Password for logging into the Cloud Manager Endpoint, if this is not set it is prompted")
 
-	passwordManagerPtr := flag.String("APIMpassword", "", "APIConnect Password for utils.Logging into the API Manager Endpoint, if this is not set it is prompted")
-	userManagerPtr := flag.String("APIMuser", "", "APIConnect User for utils.Logging into the API Manager Endpoint, if this is not set it is prompted")
-	realmManagerPtr := flag.String("APIMrealm", "", "Realm for utils.Logging into the API Manager Endpoint, if this is not set it is prompted")
+	passwordManagerPtr := flag.String("APIMpassword", "", "APIConnect Password for logging into the API Manager Endpoint, if this is not set it is prompted")
+	userManagerPtr := flag.String("APIMuser", "", "APIConnect User for logging into the API Manager Endpoint, if this is not set it is prompted")
+	realmManagerPtr := flag.String("APIMrealm", "", "Realm for logging into the API Manager Endpoint, if this is not set it is prompted")
 	orgPtr := flag.String("APIMorg", "", "Organiztion List to investigate. Please multiple orgs in csv, e.g. dev,test,chrisp,marketting ")
 	flag.Parse()
 
@@ -71,7 +71,7 @@ func main() {
 func mainRunner() {
 	utils.Vars.Server = utils.PromptServer()
 	creds := utils.PromptCredentials("Admin", "admin")
-	utils.Log("utils.Logging in")
+	utils.Log("Logging in")
 	err := errors.New("Not an error")
 	utils.Vars.Token, err = utils.Login(creds)
 	if err != nil {
