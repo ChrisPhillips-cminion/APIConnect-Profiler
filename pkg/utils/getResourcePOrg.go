@@ -105,12 +105,12 @@ func GetCatalogs(orgName string, orgId string) (*[]model.Catalog, error) {
 	chanList := make(map[string]chan bool, len)
 
 	for i, v := range jsonObj["results"].([]interface{}) {
-		name := v.(map[string]interface{})["title"].(string)
+		name := v.(map[string]interface{})["name"].(string)
 		chanList[name] = make(chan bool)
 		go AsyncGetCat(orgName, name, i, v, toReturn, orgId, chanList)
 	}
 	for _, v := range jsonObj["results"].([]interface{}) {
-		name := v.(map[string]interface{})["title"].(string)
+		name := v.(map[string]interface{})["name"].(string)
 		<-chanList[name]
 	}
 	TraceExitReturn("GetCatalogs", toReturn)

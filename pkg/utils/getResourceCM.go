@@ -240,7 +240,7 @@ func GetCMOrgID() (string, string, error) {
 		return "error", "error", err
 	}
 	toReturnId := jsonObj["results"].([]interface{})[0].(map[string]interface{})["id"].(string)
-	toReturnName := jsonObj["results"].([]interface{})[0].(map[string]interface{})["title"].(string)
+	toReturnName := jsonObj["results"].([]interface{})[0].(map[string]interface{})["name"].(string)
 	TraceExitReturn("GetCMOrgID", fmt.Sprintf("Org ID %v \t Org Name %v", toReturnId, toReturnName))
 	return toReturnId, toReturnName, nil
 }
@@ -259,7 +259,7 @@ func getOrgs() (int, *[]orgNameId, error) {
 	toReturnList := make([]orgNameId, toReturnNo)
 	for i, v := range jsonObj["results"].([]interface{}) {
 		d := v.(map[string]interface{})
-		toReturnList[i] = orgNameId{id: d["id"].(string), Name: d["title"].(string)}
+		toReturnList[i] = orgNameId{id: d["id"].(string), Name: d["name"].(string)}
 	}
 	TraceExitReturn("getOrgs", fmt.Sprintf("keyword %v", fmt.Sprintf("NoOfOrg %v \t orgList %v", toReturnNo, toReturnList)))
 	return toReturnNo, &toReturnList, nil
