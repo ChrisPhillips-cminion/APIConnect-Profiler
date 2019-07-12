@@ -2,7 +2,7 @@
 # © IBM Corp. 2019
 
 TIMESTAMP := $(shell date +%s)
-VERSION := v1.02-$(TIMESTAMP)
+VERSION := v1.03-$(TIMESTAMP)
 
 
 
