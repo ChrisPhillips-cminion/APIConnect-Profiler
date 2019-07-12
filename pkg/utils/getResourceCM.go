@@ -110,7 +110,22 @@ func GetTopLevel() (model.TopLevel, error) {
 	org := make([]model.Organization, len(orgsToInvestigate.POrg))
 	chanList := make(map[string]chan bool, len(orgsToInvestigate.POrg))
 	for i, v := range orgsToInvestigate.POrg {
+		fmt.Printf("\n\nLogging into %v\n\n",v)
 		chanList[v] = make(chan bool)
+		if access_token == "unset" {
+			Vars.UserDetails = model.UserCreds{}
+			err := errors.New("Not an error")
+			Vars.Token, err = Login(PromptCredentials(v, "provider"))
+
+			if err != nil {
+				TraceExit("GetTopLevel ERROR - Probably invalid credentials")
+				return model.TopLevel{}, err
+			}
+		} else {
+			Vars.Token = access_token
+		}
+	// }
+	// for i, v := range orgsToInvestigate.POrg {
 		go asyncGetPorg(i, v, org, access_token, chanList, orgMap)
 	}
 	for _, v := range orgsToInvestigate.POrg {
@@ -259,7 +274,7 @@ func getOrgs() (int, *[]orgNameId, error) {
 	toReturnList := make([]orgNameId, toReturnNo)
 	for i, v := range jsonObj["results"].([]interface{}) {
 		d := v.(map[string]interface{})
-		toReturnList[i] = orgNameId{id: d["id"].(string), Name: d["name"].(string)}
+		toReturnList[i] = orgNameId{Id: d["id"].(string), Name: d["name"].(string)}
 	}
 	TraceExitReturn("getOrgs", fmt.Sprintf("keyword %v", fmt.Sprintf("NoOfOrg %v \t orgList %v", toReturnNo, toReturnList)))
 	return toReturnNo, &toReturnList, nil
@@ -267,11 +282,15 @@ func getOrgs() (int, *[]orgNameId, error) {
 
 type orgNameId struct {
 	Name string
-	id   string
+	Id   string
 }
 
 func asyncGetPorg(i int, localV string, org []model.Organization, access_token string, chanList map[string]chan bool, orgMap map[string]orgNameId) error {
+
+
 	TraceEnter("asyncGetPorg")
+
+
 	Log("Investigating Organization " + localV)
 	err := errors.New("Not an error")
 	org[i], err = GetPOrg(orgMap[localV], access_token)

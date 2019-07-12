@@ -8,6 +8,6 @@ VERSION := v1.02-$(TIMESTAMP)
 
 build:
 	mkdir -p out/$(VERSION)
-	cd pkg/cmd ; env GOOS=linux go build -o ../../out/$(VERSION)/api-profiler-linux-$(VERSION)
-	cd pkg/cmd ; env GOOS=windows go build -o ../../out/$(VERSION)/api-profiler-windows-$(VERSION)
-	cd pkg/cmd ; env GOOS=darwin  go build -o ../../out/$(VERSION)/api-profiler-osx-$(VERSION)
+	cd pkg/cmd ; env GOOS=linux go build -o ../../out/$(VERSION)/api-profiler-linux  -ldflags "-X main.version=$(VERSION)"
+	cd pkg/cmd ; env GOOS=windows go build -o ../../out/$(VERSION)/api-profiler-windows  -ldflags "-X main.version=$(VERSION)"
+	cd pkg/cmd ; env GOOS=darwin  go build -o ../../out/$(VERSION)/api-profiler-osx -ldflags "-X  main.version=$(VERSION)"

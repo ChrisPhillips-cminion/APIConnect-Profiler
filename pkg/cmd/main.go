@@ -1,7 +1,8 @@
 package main
+
 /*
-      Licensed Materials - Property of IBM
-      © IBM Corp. 2019
+   Licensed Materials - Property of IBM
+   © IBM Corp. 2019
 */
 import (
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"strings"
 )
 
+var version string
 
 func main() {
 	utils.TraceEnter("main")
@@ -27,46 +29,52 @@ func main() {
 	userManagerPtr := flag.String("APIMuser", "", "APIConnect User for logging into the API Manager Endpoint, if this is not set it is prompted")
 	realmManagerPtr := flag.String("APIMrealm", "", "Realm for logging into the API Manager Endpoint, if this is not set it is prompted")
 	orgPtr := flag.String("APIMorg", "", "Organiztion List to investigate. Please multiple orgs in csv, e.g. dev,test,chrisp,marketting ")
+
+	verPtr := flag.Bool("version", false, "Get Version Number")
 	flag.Parse()
 
-	if utils.Vars.Server == "" {
-		utils.Vars.Server = *serverPtr
-	}
-	if !utils.Vars.Debug {
-		utils.Vars.Debug = *debugPtr
-	}
-	utils.Vars.UserDetails = model.UserCreds{}
-	if *realmPtr != "" {
-		utils.Vars.UserDetails.Realm = *realmPtr
-	}
-	if *userPtr != "" {
-		utils.Vars.UserDetails.Username = *userPtr
-	}
-	if *passwordPtr != "" {
-		utils.Vars.UserDetails.Password = *passwordPtr
-	}
+	if *verPtr {
+		fmt.Printf("\nVersion :: %v \n\n", version)
+	} else {
 
-	if utils.Vars.Output == "" {
-		utils.Vars.Output = *outputTypePtr
-	}
+		if utils.Vars.Server == "" {
+			utils.Vars.Server = *serverPtr
+		}
+		if !utils.Vars.Debug {
+			utils.Vars.Debug = *debugPtr
+		}
+		utils.Vars.UserDetails = model.UserCreds{}
+		if *realmPtr != "" {
+			utils.Vars.UserDetails.Realm = *realmPtr
+		}
+		if *userPtr != "" {
+			utils.Vars.UserDetails.Username = *userPtr
+		}
+		if *passwordPtr != "" {
+			utils.Vars.UserDetails.Password = *passwordPtr
+		}
 
-	if *orgPtr != "" {
-		utils.Vars.Orgs = strings.Split(*orgPtr, ",")
-	}
-	utils.Vars.UserDetailsOrg = model.UserCreds{}
-	if *realmManagerPtr != "" {
-		utils.Vars.UserDetailsOrg.Realm = *realmManagerPtr
-	}
-	if *userManagerPtr != "" {
-		utils.Vars.UserDetailsOrg.Username = *userManagerPtr
-	}
-	if *passwordManagerPtr != "" {
-		utils.Vars.UserDetailsOrg.Password = *passwordManagerPtr
-	}
+		if utils.Vars.Output == "" {
+			utils.Vars.Output = *outputTypePtr
+		}
 
-	mainRunner()
+		if *orgPtr != "" {
+			utils.Vars.Orgs = strings.Split(*orgPtr, ",")
+		}
+		utils.Vars.UserDetailsOrg = model.UserCreds{}
+		if *realmManagerPtr != "" {
+			utils.Vars.UserDetailsOrg.Realm = *realmManagerPtr
+		}
+		if *userManagerPtr != "" {
+			utils.Vars.UserDetailsOrg.Username = *userManagerPtr
+		}
+		if *passwordManagerPtr != "" {
+			utils.Vars.UserDetailsOrg.Password = *passwordManagerPtr
+		}
+
+		mainRunner()
+	}
 }
-
 
 func mainRunner() {
 	utils.Vars.Server = utils.PromptServer()
@@ -101,6 +109,6 @@ func mainRunner() {
 			}
 		}
 	}
-	//
+
 	utils.TraceExit("main")
 }

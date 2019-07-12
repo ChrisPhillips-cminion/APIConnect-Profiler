@@ -18,6 +18,7 @@ type TopLevel struct {
 
 type Organization struct {
 	Name            string
+	Id 							string
 	Catalog         *[]Catalog
 	NoMembers       int
 	NoMemberInvites int

@@ -4,7 +4,7 @@ package utils
       © IBM Corp. 2019
 */
 import (
-	"errors"
+	// "errors"
 	"fmt"
 	"github.com/chrisphillips-cminion/apiprofile/pkg/model"
 	"strings"
@@ -12,20 +12,9 @@ import (
 
 func GetPOrg(orgDetails orgNameId, access_token string) (model.Organization, error) {
 	TraceEnter("Get Org")
-	if access_token == "unset" {
-		Vars.UserDetails = model.UserCreds{}
-		err := errors.New("Not an error")
-		Vars.Token, err = Login(PromptCredentials(orgDetails.Name, "provider"))
 
-		if err != nil {
-			TraceExit("GetPOrg ERROR")
-			return model.Organization{}, err
-		}
-	} else {
-		Vars.Token = access_token
-	}
 	// promptToAnalyse()
-	orgId := orgDetails.id
+	orgId := orgDetails.Id
 	no, max, avg, _ := ProcessAPI("orgs/"+orgId+"/drafts/draft-apis", "draft_api")
 	cat, err := GetCatalogs(orgDetails.Name, orgId)
 	member, err := getData("orgs", orgId, "members")
@@ -40,6 +29,7 @@ func GetPOrg(orgDetails orgNameId, access_token string) (model.Organization, err
 		TraceExit("GetPOrg ERROR")
 		return model.Organization{
 			Name:            orgDetails.Name,
+			Id: 			   		 orgId,
 			Catalog:         &[]model.Catalog{},
 			NoMembers:       -1,
 			NoMemberInvites: -1,
@@ -57,6 +47,7 @@ func GetPOrg(orgDetails orgNameId, access_token string) (model.Organization, err
 	}
 	toReturn := model.Organization{
 		Name:            orgDetails.Name,
+		Id: 			   		 orgId,
 		Catalog:         cat,
 		NoMembers:       member,
 		NoMemberInvites: mi,
